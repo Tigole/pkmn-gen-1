@@ -2,15 +2,18 @@ _OaksLabGaryText1::
 	text "<RIVAL>: Yo!"
 	line "<PLAYER>! Pépé"
 	cont "n'est pas là!"
+
+	para "J'ai couru jusque"
+	line "ici parce qu'il"
+	cont "m'avait dit avoir"
+	para "un #MON"
+	line "pour moi."
 	done
 
 _OaksLabText40::
-	text "<RIVAL>: Je ne"
-	line "suis pas avide"
-	cont "comme toi!"
-
-	para "Allez, choisis,"
-	line "<PLAYER>!"
+	text "<RIVAL>: J'm'en"
+	line "fiche, le mieux"
+	cont "sera plus fort !"
 	done
 
 _OaksLabText41::
