@@ -76,8 +76,8 @@ CableClubNPC::
 	xor a
 	ld [hl], a
 	ldh [hSerialReceivedNewData], a
-	ld [wSerialExchangeNybbleSendData], a
 	vc_hook Wireless_prompt
+	ld [wSerialExchangeNybbleSendData], a
 	call Serial_SyncAndExchangeNybble
 	vc_hook Wireless_net_recheck
 	ld hl, wUnknownSerialCounter
@@ -110,8 +110,8 @@ CableClubNPC::
 	ld hl, wUnknownSerialCounter
 	ld [hli], a
 	ld [hl], a
-	ld hl, wd72e
-	res 6, [hl]
+	ld hl, wStatusFlags4
+	res BIT_LINK_CONNECTED, [hl]
 	xor a
 	ld [wMenuJoypadPollCount], a
 	ret

@@ -14,7 +14,7 @@ _CardKeyFailText::
 	done
 
 _TrainerNameText::
-	text_ram wcd6d
+	text_ram wPayDayMoney
 	text ": @"
 	text_end
 

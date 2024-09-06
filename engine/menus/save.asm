@@ -1,6 +1,5 @@
 LoadSAV:
-;(if carry -> write
-;"the file data is destroyed")
+; if carry, write "the file data is destroyed"
 	call ClearScreen
 	call LoadFontTilePatterns
 	call LoadTextBoxTilePatterns
@@ -13,15 +12,15 @@ LoadSAV:
 	ld a, $2 ; good checksum
 	jr .goodsum
 .badsum
-	ld hl, wd730
+	ld hl, wStatusFlags5
 	push hl
-	set 6, [hl]
+	set BIT_NO_TEXT_DELAY, [hl]
 	ld hl, FileDataDestroyedText
 	call PrintText
 	ld c, 100
 	call DelayFrames
 	pop hl
-	res 6, [hl]
+	res BIT_NO_TEXT_DELAY, [hl]
 	ld a, $1 ; bad checksum
 .goodsum
 	ld [wSaveFileStatus], a
@@ -372,7 +371,7 @@ ChangeBox::
 	call GetBoxSRAMLocation
 	ld de, wBoxDataStart
 	call CopyBoxToOrFromSRAM ; copy new box from SRAM to WRAM
-	ld hl, wMapTextPtr
+	ld hl, wCurMapTextPtr
 	ld de, wChangeBoxSavedMapTextPointer
 	ld a, [hli]
 	ld [de], a
@@ -430,7 +429,7 @@ DisplayChangeBoxMenu:
 	ld [wMaxMenuItem], a
 	ld a, 1
 	ld [wTopMenuItemY], a
-	ld a, 10
+	ld a, 12
 	ld [wTopMenuItemX], a
 	xor a
 	ld [wMenuWatchMovingOutOfBounds], a
@@ -440,18 +439,18 @@ DisplayChangeBoxMenu:
 	ld [wLastMenuItem], a
 	hlcoord 0, 0
 	ld b, 2
-	ld c, 7
+	ld c, 9
 	call TextBoxBorder
 	ld hl, ChooseABoxText
 	call PrintText
-	hlcoord 9, 0
+	hlcoord 11, 0
 	ld b, 12
-	ld c, 9
+	ld c, 7
 	call TextBoxBorder
 	ld hl, hUILayoutFlags
 	set 2, [hl]
 	ld de, BoxNames
-	hlcoord 11, 1
+	hlcoord 13, 1
 	call PlaceString
 	ld hl, hUILayoutFlags
 	res 2, [hl]
@@ -460,14 +459,14 @@ DisplayChangeBoxMenu:
 	cp 9
 	jr c, .singleDigitBoxNum
 	sub 9
-	hlcoord 6, 2
+	hlcoord 8, 2
 	ld [hl], "1"
 	add "0"
 	jr .next
 .singleDigitBoxNum
 	add "1"
 .next
-	ldcoord_a 7, 2
+	ldcoord_a 9, 2
 	hlcoord 1, 2
 	ld de, BoxNoText
 	call PlaceString
@@ -705,7 +704,7 @@ ClearSAV:
 
 PadSRAM_FF:
 	ld [MBC1SRamBank], a
-	ld hl, SRAM_Begin
-	ld bc, SRAM_End - SRAM_Begin
+	ld hl, STARTOF(SRAM)
+	ld bc, SIZEOF(SRAM)
 	ld a, $ff
 	jp FillMemory

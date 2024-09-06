@@ -57,8 +57,8 @@ CableClub_DoBattleOrTradeAgain:
 	ld [hli], a
 	dec b
 	jr nz, .zeroPlayerDataPatchListLoop
-	ld hl, wLinkEnemyTrainerName
-	ld bc, wTrainerHeaderPtr - wLinkEnemyTrainerName
+	ld hl, wGrassRate
+	ld bc, wTrainerHeaderPtr - wGrassRate
 .zeroEnemyPartyLoop
 	xor a
 	ld [hli], a
@@ -259,9 +259,9 @@ CableClub_DoBattleOrTradeAgain:
 	dec c
 	jr nz, .unpatchEnemyMonsLoop
 	ld a, LOW(wEnemyMonOT)
-	ld [wUnusedCF8D], a
+	ld [wUnusedNamePointer], a
 	ld a, HIGH(wEnemyMonOT)
-	ld [wUnusedCF8D + 1], a
+	ld [wUnusedNamePointer + 1], a
 	xor a
 	ld [wTradeCenterPointerTableIndex], a
 	ld a, SFX_STOP_ALL_MUSIC
@@ -587,7 +587,7 @@ ReturnToCableClubRoom:
 	push hl
 	res 0, [hl]
 	xor a
-	ld [wd72d], a
+	ld [wStatusFlags3], a ; clears BIT_INIT_TRADE_CENTER_FACING
 	dec a
 	ld [wDestinationWarpID], a
 	call LoadMapData
@@ -599,9 +599,9 @@ ReturnToCableClubRoom:
 	ret
 
 TradeCenter_DrawCancelBox:
-	hlcoord 8, 15
+	hlcoord 11, 15
 	ld a, $7e
-	ld bc, 2 * SCREEN_WIDTH + 12
+	ld bc, 2 * SCREEN_WIDTH + 9
 	call FillMemory
 	hlcoord 0, 15
 	ld b, 1
@@ -699,7 +699,7 @@ TradeCenter_Trade:
 	ld a, [hl]
 	ld [wd11e], a
 	call GetMonName
-	ld hl, wcd6d
+	ld hl, wNameBuffer
 	ld de, wNameOfPlayerMonToBeTraded
 	ld bc, NAME_LENGTH
 	call CopyData
@@ -715,8 +715,8 @@ TradeCenter_Trade:
 	bccoord 1, 14
 	call TextCommandProcessor
 	call SaveScreenTilesToBuffer1
-	hlcoord 9, 7
-	lb bc, 8, 10
+	hlcoord 10, 7
+	lb bc, 8, 11
 	ld a, TRADE_CANCEL_MENU
 	ld [wTwoOptionMenuID], a
 	ld a, TWO_OPTION_MENU
@@ -806,7 +806,7 @@ TradeCenter_Trade:
 	ld e, a
 	add hl, de
 	ld a, [hl]
-	ld [wcf91], a
+	ld [wCurPartySpecies], a
 	ld hl, wEnemyMons
 	ld a, c
 	ld bc, wEnemyMon2 - wEnemyMon1
@@ -839,7 +839,7 @@ TradeCenter_Trade:
 	call ClearScreen
 	call LoadHpBarAndStatusTilePatterns
 	xor a
-	ld [wUnusedCC5B], a
+	ld [wUnusedFlag], a
 	ldh a, [hSerialConnectionStatus]
 	cp USING_EXTERNAL_CLOCK
 	jr z, .usingExternalClock

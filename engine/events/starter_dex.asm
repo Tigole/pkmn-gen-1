@@ -1,9 +1,32 @@
-; this function temporarily makes the starters (and Ivysaur) seen
+; this function temporarily makes the starters (and Ivysaur) owned
 ; so that the full Pokedex information gets displayed in Oak's lab
+macro MACROAddStartDex
+	push af
+	ld c, \1
+	dec c
+	ld b, FLAG_SET
+	ld hl, wPokedexOwned
+	predef FlagActionPredef
+	pop af
+endm
+
+macro MACROClearStarterDex
+	push af
+	ld c, \1
+	dec c
+	ld b, FLAG_RESET
+	ld hl, wPokedexOwned
+	predef FlagActionPredef
+	pop af
+endm
+
 StarterDex:
-	ld a, 1 << (DEX_BULBASAUR - 1) | 1 << (DEX_IVYSAUR - 1) | 1 << (DEX_CHARMANDER - 1) | 1 << (DEX_SQUIRTLE - 1)
-	ld [wPokedexOwned], a
+	ld c, DEX_MEWTWO
+	MACROAddStartDex DEX_MEWTWO
+	MACROAddStartDex DEX_CHARIZARD
+	MACROAddStartDex DEX_GLOOM
 	predef ShowPokedexData
-	xor a
-	ld [wPokedexOwned], a
+	MACROClearStarterDex DEX_MEWTWO
+	MACROClearStarterDex DEX_CHARIZARD
+	MACROClearStarterDex DEX_GLOOM
 	ret

@@ -60,8 +60,8 @@ UpdatePlayerSprite:
 	bit 0, a
 	jr nz, .notMoving
 .moving
-	ld a, [wd736]
-	bit 7, a ; is the player sprite spinning due to a spin tile?
+	ld a, [wMovementFlags]
+	bit BIT_SPINNING, a
 	jr nz, .skipSpriteAnim
 	ldh a, [hCurrentSpriteOffset]
 	add $7
@@ -129,7 +129,7 @@ UpdateNPCSprite:
 	and a
 	jp z, InitializeSpriteStatus
 	call CheckSpriteAvailability
-	ret c             ; if sprite is invisible, on tile >=MAP_TILESET_SIZE, in grass or player is currently walking
+	ret c             ; don't do anything if sprite is invisible
 	ld h, HIGH(wSpriteStateData1)
 	ldh a, [hCurrentSpriteOffset]
 	ld l, a
@@ -148,7 +148,7 @@ UpdateNPCSprite:
 	jp z, UpdateSpriteInWalkingAnimation  ; [x#SPRITESTATEDATA1_MOVEMENTSTATUS] == 3
 	ld a, [wWalkCounter]
 	and a
-	ret nz           ; don't do anything yet if player is currently moving (redundant, already tested in CheckSpriteAvailability)
+	ret nz           ; don't do anything yet if player is currently moving
 	call InitializeSpriteScreenPosition
 	ld h, HIGH(wSpriteStateData2)
 	ldh a, [hCurrentSpriteOffset]
@@ -175,11 +175,11 @@ UpdateNPCSprite:
 	jr nz, .next
 ; reached end of wNPCMovementDirections list
 	ld [hl], a ; store $ff in movement byte 1, disabling scripted movement
-	ld hl, wd730
-	res 0, [hl]
+	ld hl, wStatusFlags5
+	res BIT_SCRIPTED_NPC_MOVEMENT, [hl]
 	xor a
 	ld [wSimulatedJoypadStatesIndex], a
-	ld [wWastedByteCD3A], a
+	ld [wUnusedOverrideSimulatedJoypadStatesIndex], a
 	ret
 .next
 	cp WALK
@@ -409,8 +409,8 @@ MakeNPCFacePlayer:
 
 ; Check if the behaviour of the NPC facing the player when spoken to is
 ; disabled. This is only done when rubbing the S.S. Anne captain's back.
-	ld a, [wd72d]
-	bit 5, a
+	ld a, [wStatusFlags3]
+	bit BIT_NO_NPC_FACE_PLAYER, a
 	jr nz, notYetMoving
 	res 7, [hl]
 	ld a, [wPlayerDirection]
@@ -448,7 +448,6 @@ InitializeSpriteStatus:
 	ld a, $8
 	ld [hli], a   ; [x#SPRITESTATEDATA2_YDISPLACEMENT] = 8
 	ld [hl], a    ; [x#SPRITESTATEDATA2_XDISPLACEMENT] = 8
-	call InitializeSpriteScreenPosition ; could have done fallthrough here
 	ret
 
 ; calculates the sprite's screen position from its map position and the player position
@@ -461,7 +460,7 @@ InitializeSpriteScreenPosition:
 	ld b, a
 	ld a, [hl]      ; x#SPRITESTATEDATA2_MAPY
 	sub b           ; relative to player position
-	call Func_515D
+	swap a          ; * 16
 	sub $4          ; - 4
 	dec h
 	ld [hli], a     ; [x#SPRITESTATEDATA1_YPIXELS]
@@ -470,21 +469,9 @@ InitializeSpriteScreenPosition:
 	ld b, a
 	ld a, [hli]     ; x#SPRITESTATEDATA2_MAPX
 	sub b           ; relative to player position
-	call Func_515D
+	swap a          ; * 16
 	dec h
 	ld [hl], a      ; [x#SPRITESTATEDATA1_XPIXELS]
-	ret
-
-Func_515D:
-	jr nc, .asm_5166
-	cpl
-	inc a
-	swap a
-	cpl
-	inc a
-	ret
-.asm_5166
-	swap a          ; * 16
 	ret
 
 ; tests if sprite is off screen or otherwise unable to do anything
@@ -717,7 +704,7 @@ GetTileSpriteStandsOn:
 	ld l, a
 	ld a, [hli]     ; x#SPRITESTATEDATA1_YPIXELS
 	add $4          ; align to 2*2 tile blocks (Y position is always off 4 pixels to the top)
-	and $f8         ; in case object is currently moving
+	and $f0         ; in case object is currently moving
 	srl a           ; screen Y tile * 4
 	ld c, a
 	ld b, $0
@@ -753,12 +740,12 @@ DoScriptedNPCMovement:
 ; a few times in the game. It is used when the NPC and player must walk together
 ; in sync, such as when the player is following the NPC somewhere. An NPC can't
 ; be moved in sync with the player using the other method.
-	ld a, [wd730]
-	bit 7, a
+	ld a, [wStatusFlags5]
+	bit BIT_SCRIPTED_MOVEMENT_STATE, a
 	ret z
-	ld hl, wd72e
-	bit 7, [hl]
-	set 7, [hl]
+	ld hl, wStatusFlags4
+	bit BIT_INIT_SCRIPTED_MOVEMENT, [hl]
+	set BIT_INIT_SCRIPTED_MOVEMENT, [hl]
 	jp z, InitScriptedNPCMovement
 	ld hl, wNPCMovementDirections2
 	ld a, [wNPCMovementDirections2Index]

@@ -8,7 +8,7 @@ AskName:
 	ld b, 4
 	ld c, 11
 	call z, ClearScreenArea ; only if in wild battle
-	ld a, [wcf91]
+	ld a, [wCurPartySpecies]
 	ld [wd11e], a
 	call GetMonName
 	ld hl, DoYouWantToNicknameText
@@ -45,7 +45,7 @@ AskName:
 .declinedNickname
 	ld d, h
 	ld e, l
-	ld hl, wcd6d
+	ld hl, wNameBuffer
 	ld bc, NAME_LENGTH
 	jp CopyData
 
@@ -83,8 +83,8 @@ DisplayNameRaterScreen::
 
 DisplayNamingScreen:
 	push hl
-	ld hl, wd730
-	set 6, [hl]
+	ld hl, wStatusFlags5
+	set BIT_NO_TEXT_DELAY, [hl]
 	call GBPalWhiteOutWithDelay3
 	call ClearScreen
 	call UpdateSprites
@@ -168,8 +168,8 @@ DisplayNamingScreen:
 	call GBPalNormal
 	xor a
 	ld [wAnimCounter], a
-	ld hl, wd730
-	res 6, [hl]
+	ld hl, wStatusFlags5
+	res BIT_NO_TEXT_DELAY, [hl]
 	ld a, [wIsInBattle]
 	and a
 	jp z, LoadTextBoxTilePatterns
@@ -325,15 +325,11 @@ DisplayNamingScreen:
 	jp EraseMenuCursor
 
 LoadEDTile:
-	call DisableLCD
-	ld de, vFont tile $70
-	ld hl, ED_Tile
-	ld bc, (ED_TileEnd - ED_Tile)
-	; to fix the graphical bug on poor emulators
-	;lb bc, BANK(ED_Tile), (ED_TileEnd - ED_Tile) / $8
-	ld a,$01
-	call FarCopyDataDouble
-	jp EnableLCD
+	ld de, ED_Tile
+	ld hl, vFont tile $70
+	; BUG: BANK("Home") should be BANK(ED_Tile), although it coincidentally works as-is
+	lb bc, BANK("Home"), (ED_TileEnd - ED_Tile) / $8
+	jp CopyVideoDataDouble
 
 ED_Tile:
 	INCBIN "gfx/font/ED.1bpp"
@@ -462,10 +458,10 @@ PrintNamingText:
 	ld de, RivalsTextString
 	dec a
 	jr z, .placeString
-	ld a, [wcf91]
+	ld a, [wCurPartySpecies]
 	ld [wMonPartySpriteSpecies], a
 	push af
-	farcall LoadSinglePartyMonSprite
+	farcall WriteMonPartySpriteOAMBySpecies
 	pop af
 	ld [wd11e], a
 	call GetMonName
@@ -474,7 +470,6 @@ PrintNamingText:
 	hlcoord 1, 3
 	ld de, NicknameTextString
 	jr .placeString
-
 .placeString
 	jp PlaceString
 

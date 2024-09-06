@@ -29,7 +29,7 @@ HallOfFamePC:
 	ld c, 128
 	call DelayFrames
 	xor a
-	ld [wUnusedCD3D], a ; not read
+	ld [wUnusedCreditsByte], a ; not read
 	ld [wNumCreditsMonsDisplayed], a
 	jp Credits
 
@@ -59,7 +59,7 @@ DisplayCreditsMon:
 	ld hl, CreditsMons
 	add hl, bc ; go that far in the list of monsters and get the next one
 	ld a, [hl]
-	ld [wcf91], a
+	ld [wCurPartySpecies], a
 	ld [wd0b5], a
 	hlcoord 8, 6
 	call GetMonHeader
@@ -131,10 +131,10 @@ ScrollCreditsMonLeft_SetSCX:
 	ret
 
 HoFGBPalettes:
-	db %11000000
-	db %11010000
-	db %11100000
-	db %11110000
+	dc 3, 0, 0, 0
+	dc 3, 1, 0, 0
+	dc 3, 2, 0, 0
+	dc 3, 3, 0, 0
 
 CreditsCopyTileMapToVRAM:
 	ld a, l
@@ -246,20 +246,20 @@ Credits:
 	pop de
 	ld de, TheEndGfx
 	ld hl, vChars2 tile $60
-	lb bc, BANK(TheEndGfx), (TheEndGfxEnd - TheEndGfx) / $0C
+	lb bc, BANK(TheEndGfx), (TheEndGfxEnd - TheEndGfx) / $10
 	call CopyVideoData
-	hlcoord 7, 8
+	hlcoord 4, 8
 	ld de, TheEndTextString
 	call PlaceString
-	hlcoord 7, 9
+	hlcoord 4, 9
 	inc de
 	call PlaceString
 	jp FadeInCreditsText
 
 TheEndTextString:
 ; "T H E  E N D"
-	db $60," ",$62,$64," ",$66,"@"
-	db $61," ",$63,$65," ",$67,"@"
+	db $60," ",$62," ",$64,"  ",$64," ",$66," ",$68,"@"
+	db $61," ",$63," ",$65,"  ",$65," ",$67," ",$69,"@"
 
 INCLUDE "data/credits/credits_order.asm"
 

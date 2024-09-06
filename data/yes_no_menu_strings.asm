@@ -12,35 +12,35 @@ TwoOptionMenuStrings:
 	two_option_menu 6, 3, FALSE, .SouthEastMenu
 	two_option_menu 6, 3, FALSE, .YesNoMenu
 	two_option_menu 6, 3, FALSE, .NorthEastMenu
-	two_option_menu 8, 3, FALSE, .TradeCancelMenu
+	two_option_menu 6, 3, FALSE, .TradeCancelMenu
 	two_option_menu 7, 4, TRUE,  .HealCancelMenu
 	two_option_menu 4, 3, FALSE, .NoYesMenu
 	assert_table_length NUM_TWO_OPTION_MENUS
 
-.NorthWestMenu
-	db   "NORTH"
-	next "WEST@"
-
-.SouthEastMenu
-	db   "SOUTH"
-	next "EAST@"
-
-.NorthEastMenu
-	db   "NORTH"
-	next "EAST@"
-
-.NoYesMenu
+.NoYesMenu:
 	db   "NON"
 	next "OUI@"
 
-.YesNoMenu
+.YesNoMenu:
 	db   "OUI"
 	next "NON@"
 
-.TradeCancelMenu
+.NorthWestMenu:
+	db   "NORTH"
+	next "WEST@"
+
+.SouthEastMenu:
+	db   "SOUTH"
+	next "EAST@"
+
+.NorthEastMenu:
+	db   "NORTH"
+	next "EAST@"
+
+.TradeCancelMenu:
 	db   "ECHANGE"
 	next "RETOUR@"
 
-.HealCancelMenu
+.HealCancelMenu:
 	db   "SOIN"
 	next "RETOUR@"

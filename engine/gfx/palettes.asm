@@ -69,7 +69,7 @@ SetPal_StatusScreen:
 	ld de, wPalPacket
 	ld bc, $10
 	call CopyData
-	ld a, [wcf91]
+	ld a, [wCurPartySpecies]
 	cp NUM_POKEMON_INDEXES + 1
 	jr c, .pokemon
 	ld a, $1 ; not pokemon
@@ -97,7 +97,7 @@ SetPal_Pokedex:
 	ld de, wPalPacket
 	ld bc, $10
 	call CopyData
-	ld a, [wcf91]
+	ld a, [wCurPartySpecies]
 	call DeterminePaletteIDOutOfBattle
 	ld hl, wPalPacket + 3
 	ld [hl], a
@@ -484,6 +484,7 @@ CheckSGB:
 	ldh a, [rJOYP]
 	ldh a, [rJOYP]
 	call Wait7000
+	vc_hook Unknown_network_reset
 	call Wait7000
 	ld a, $30
 	ldh [rJOYP], a
@@ -507,7 +508,6 @@ CheckSGB:
 SendMltReq1Packet:
 	ld hl, MltReq1Packet
 	call SendSGBPacket
-	vc_hook Unknown_network_reset
 	jp Wait7000
 
 CopyGfxToSuperNintendoVRAM:

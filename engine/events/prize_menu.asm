@@ -5,8 +5,8 @@ CeladonPrizeMenu::
 	ld hl, RequireCoinCaseTextPtr
 	jp PrintText
 .havingCoinCase
-	ld hl, wd730
-	set 6, [hl] ; disable letter-printing delay
+	ld hl, wStatusFlags5
+	set BIT_NO_TEXT_DELAY, [hl]
 	ld hl, ExchangeCoinsForPrizesTextPtr
 	call PrintText
 ; the following are the menu settings
@@ -38,8 +38,8 @@ CeladonPrizeMenu::
 	jr z, .noChoice
 	call HandlePrizeChoice
 .noChoice
-	ld hl, wd730
-	res 6, [hl]
+	ld hl, wStatusFlags5
+	res BIT_NO_TEXT_DELAY, [hl]
 	ret
 
 RequireCoinCaseTextPtr:
@@ -129,15 +129,18 @@ GetPrizeMenuId:
 ; put prices on the right side of the textbox
 	ld de, wPrize1Price
 	hlcoord 13, 5
-	ld c, LEADING_ZEROES | 2
+; reg. c:
+; [low nybble] number of bytes
+; [bits 765 = %100] space-padding (not zero-padding)
+	ld c, (1 << 7 | 2)
 	call PrintBCDNumber
 	ld de, wPrize2Price
 	hlcoord 13, 7
-	ld c, LEADING_ZEROES | 2
+	ld c, (1 << 7 | 2)
 	call PrintBCDNumber
 	ld de, wPrize3Price
 	hlcoord 13, 9
-	ld c, LEADING_ZEROES | 2
+	ld c, (1 << 7 | 2)
 	jp PrintBCDNumber
 
 INCLUDE "data/events/prizes.asm"
@@ -156,7 +159,7 @@ PrintPrizePrice:
 	call PlaceString
 	hlcoord 13, 1
 	ld de, wPlayerCoins
-	ld c, LEADING_ZEROES | 2
+	ld c, %10000010
 	call PrintBCDNumber
 	ret
 
@@ -219,7 +222,7 @@ HandlePrizeChoice:
 	jr .subtractCoins
 .giveMon
 	ld a, [wd11e]
-	ld [wcf91], a
+	ld [wCurPartySpecies], a
 	push af
 	call GetPrizeMonLevel
 	ld c, a
@@ -284,7 +287,7 @@ OhFineThenTextPtr:
 	text_end
 
 GetPrizeMonLevel:
-	ld a, [wcf91]
+	ld a, [wCurPartySpecies]
 	ld b, a
 	ld hl, PrizeMonLevelDictionary
 .loop
@@ -295,7 +298,7 @@ GetPrizeMonLevel:
 	jr .loop
 .matchFound
 	ld a, [hl]
-	ld [wCurEnemyLVL], a
+	ld [wCurEnemyLevel], a
 	ret
 
 INCLUDE "data/events/prize_mon_levels.asm"
