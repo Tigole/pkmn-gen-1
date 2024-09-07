@@ -10,7 +10,6 @@ IF DEF(_RED)
 	db 14, ODDISH
 	db 10, ABRA
 	db  7, METAPOD
-	db  8, CATERPIE
 ENDC
 IF DEF(_BLUE)
 	db  8, CATERPIE
@@ -22,8 +21,8 @@ IF DEF(_BLUE)
 	db 14, BELLSPROUT
 	db 10, ABRA
 	db  7, KAKUNA
-	db  8, WEEDLE
 ENDC
+	db  5, CHARMANDER
 	end_grass_wildmons
 
 	def_water_wildmons 0 ; encounter rate
